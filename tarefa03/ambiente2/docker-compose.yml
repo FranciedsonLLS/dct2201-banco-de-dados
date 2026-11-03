@@ -1,0 +1,28 @@
+# Desafio 2 - Segundo ambiente, executado em paralelo ao da pasta tarefa03.
+# Para não haver conflito com o primeiro ambiente:
+#   - container_name diferente (lab2-...), pois nomes de contêiner são únicos no Docker;
+#   - portas do host diferentes (definidas no .env desta pasta);
+#   - volume isolado: o Compose prefixa o volume com o nome do projeto (nome da pasta),
+#     então este vira "ambiente2_mariadb_data" e o outro "tarefa03_mariadb_data".
+services:
+  mariadb:
+    image: mariadb:11
+    container_name: lab2-mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?defina MARIADB_ROOT_PASSWORD no arquivo .env}
+      MARIADB_DATABASE: ${MARIADB_DATABASE:-labdb}
+    ports:
+      - "${MARIADB_PORT:-3308}:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+  cloudbeaver:
+    image: dbeaver/cloudbeaver:latest
+    container_name: lab2-cloudbeaver
+    ports:
+      - "${CLOUDBEAVER_PORT:-8979}:8978"
+    depends_on:
+      - mariadb
+
+volumes:
+  mariadb_data:
